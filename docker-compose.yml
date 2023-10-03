@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  database:
+    # We use a mariadb image which supports both amd64 & arm64 architecture
+    image: mariadb:10.6.4-focal
+    restart: unless-stopped
+    ports:
+      - 3310:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppassword
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - wordpress-network
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
+
+  phpmyadmin:
+    depends_on:
+      - database
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: database
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - wordpress-network
+
+  wordpress:
+    depends_on:
+      - database
+    image: wordpress:latest
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: database:3306 # use the same name as database service
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppassword
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - ./wordpress:/var/www/html/
+      - ./log/:/var/log
+      - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    networks:
+      - wordpress-network
+
+volumes:
+  db-data:
+
+networks:
+  wordpress-network:
+    driver: bridge
