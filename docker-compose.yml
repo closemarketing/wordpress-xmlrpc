@@ -14,23 +14,19 @@ services:
       MYSQL_PASSWORD: wppassword
     volumes:
       - db-data:/var/lib/mysql
-    networks:
-      - wordpress-network
     deploy:
       resources:
         limits:
           memory: 2048m
 
   phpmyadmin:
-    depends_on:
-      - database
-    image: phpmyadmin/phpmyadmin
-    restart: unless-stopped
+    image: phpmyadmin
     ports:
       - 8081:80
     environment:
-      PMA_HOST: database
-      MYSQL_ROOT_PASSWORD: password
+      - PMA_HOST=database
+    depends_on:
+      - database
     networks:
       - wordpress-network
 
@@ -38,7 +34,9 @@ services:
     depends_on:
       - database
     image: wordpress:latest
-    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 8080:80
     environment:
@@ -46,9 +44,10 @@ services:
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wpuser
       WORDPRESS_DB_PASSWORD: wppassword
-      WORDPRESS_DEBUG: 1
+      WORDPRESS_XMLRPC: "1"
+      WORDPRESS_DEBUG: "1"
     volumes:
-      - ./wordpress:/var/www/html/
+      - ./wordpress_data:/var/www/html/
       - ./log/:/var/log
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
     networks:
