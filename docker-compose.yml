@@ -24,19 +24,14 @@ services:
     ports:
       - 8081:80
     environment:
-      - PMA_HOST=database
+      - PMA_HOST=mysql
     depends_on:
       - database
-    networks:
-      - wordpress-network
 
   wordpress:
     depends_on:
       - database
-    image: wordpress:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: xmlwordpress
     ports:
       - 8080:80
     environment:
@@ -47,11 +42,9 @@ services:
       WORDPRESS_XMLRPC: "1"
       WORDPRESS_DEBUG: "1"
     volumes:
-      - ./wordpress_data:/var/www/html/
+      - ./wordpress:/var/www/html/
       - ./log/:/var/log
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-    networks:
-      - wordpress-network
 
 volumes:
   db-data:

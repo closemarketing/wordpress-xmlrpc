@@ -1,6 +1,6 @@
 FROM wordpress:latest
 
-
+ENV DOCUMENT_ROOT /var/www/html
 
 #Install nginx php-fpm php-pdo unzip curl
 RUN apt-get update && apt-get -y install unzip curl apt-utils
@@ -21,21 +21,6 @@ RUN mv wp-cli.phar /usr/local/bin/wp
 RUN docker-php-ext-enable xdebug
 
 RUN docker-php-ext-enable xmlrpc
-
-
-
-#Change php.ini file
-#/usr/local/etc/php/php.ini
-#extension=xmlrpc.so
-
-#WPCLI
-
-#XDebug
-
-
 #directorio de trabajo
 WORKDIR /var/www/html
 #puerto expuesto
-EXPOSE 80
-#Iniciar un servidor web php dentro del contenedor para poder acceder a el por medio del puerto 80
-CMD ["php", "-S", "0.0.0.0:80"]
